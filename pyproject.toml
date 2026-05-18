@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "gerby"
+version = "0.1.0"
+description = "Gerby website"
+authors = []
+packages = [{include = "gerby"}]
+include = [{path = "gerby/**/*", format = ["sdist", "wheel"]}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flask = "*"
+PyPDF2 = "*"
+Markdown = "*"
+mdx_bleach = "*"
+bleach = "*"
+python-markdown-math = "*"
+validators = "*"
+peewee = "<3.17"
+flask-profiler = "*"
+pybtex = "*"
+feedparser = "*"
+networkx = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
