@@ -1,15 +1,36 @@
 #!/usr/bin/env bash
-# test_endpoints.sh — smoke-test all GET endpoints of the gerby website.
-# Usage: ./test_endpoints.sh [HOST]
-#   HOST defaults to http://localhost:8080
+# test_endpoints.sh — smoke-test all GET and POST endpoints of the gerby website.
+#
+# Usage: ./test_endpoints.sh [--dev] [HOST]
+#
+#   --dev   Also run the POST /post-comment test with a valid email.
+#                     WARNING: this writes a real comment to the database.
+#                     Requires TEST_EMAIL to be set.
+#   HOST              Base URL, defaults to http://localhost:8080
 #
 # Sample values for parametrised routes can be overridden via env vars:
 #   TAG=0001 BIBKEY=sga4 CHAPTER=1 TEX_FILE=preamble.tex PDF_FILE=book.pdf
+#   TEST_EMAIL=you@example.com  (used when --dev is given, defaults to you@example.com)
 
 set -euo pipefail
 
-HOST="${1:-http://localhost:8080}"
+# ----------------------------------------------------------------
+# Argument parsing
+# ----------------------------------------------------------------
+HOST="http://localhost:8080"
+WRITE_COMMENT=false
+
+for arg in "$@"; do
+  case "${arg}" in
+    --dev) WRITE_COMMENT=true ;;
+    http://*|https://*) HOST="${arg}" ;;
+    *) echo "Unknown argument: ${arg}" >&2; exit 1 ;;
+  esac
+done
+
 HOST="${HOST%/}"          # strip trailing slash
+
+TEST_EMAIL="${TEST_EMAIL:-you@example.com}"
 
 # --- sample values for parametrised routes (override via env) ---
 TAG="${TAG:-0001}"
@@ -118,10 +139,70 @@ for path in "${ENDPOINTS[@]}"; do
 done
 
 # ----------------------------------------------------------------
+# POST endpoints
+# ----------------------------------------------------------------
+echo ""
+echo -e "${BOLD}POST endpoints${RESET}"
+echo "-----------------------------------------------------------"
+
+post_url="${HOST}/post-comment"
+
+# --- invalid email (always runs) ---
+# Passes the captcha but supplies an invalid email so no comment is written
+# to the database.  Expects a 200 "invalid email" page.
+invalid_code=$(curl -s -o /dev/null -w "%{http_code}" \
+  -X POST \
+  -H "Referer: ${HOST}/tag/${TAG}" \
+  --data-urlencode "tag=${TAG}" \
+  --data-urlencode "check=${TAG}" \
+  --data-urlencode "name=smoke-test" \
+  --data-urlencode "mail=not-a-valid-email" \
+  --data-urlencode "site=" \
+  --data-urlencode "comment=smoke test" \
+  --connect-timeout 10 --max-time 30 \
+  "${post_url}" 2>/dev/null) || invalid_code="000"
+
+if [[ "${invalid_code}" =~ ^[23] ]]; then
+  echo -e "  ${GREEN}PASS${RESET} [${invalid_code}]  ${post_url}  (invalid email)"
+  (( PASS++ )) || true
+else
+  echo -e "  ${RED}FAIL${RESET} [${invalid_code}]  ${post_url}  (invalid email)"
+  FAILED_ENDPOINTS+=("${post_url} (invalid email)  (HTTP ${invalid_code})")
+  (( FAIL++ )) || true
+fi
+
+# --- valid email (only with --dev) ---
+# Passes the captcha with a real email address and WILL write a comment to
+# the database.  Expects a 302 redirect to the tag page.
+if [[ "${WRITE_COMMENT}" == true ]]; then
+  valid_code=$(curl -s -o /dev/null -w "%{http_code}" \
+    -X POST \
+    -H "Referer: ${HOST}/tag/${TAG}" \
+    --data-urlencode "tag=${TAG}" \
+    --data-urlencode "check=${TAG}" \
+    --data-urlencode "name=smoke-test" \
+    --data-urlencode "mail=${TEST_EMAIL}" \
+    --data-urlencode "site=" \
+    --data-urlencode "comment=smoke test (automated, please delete)" \
+    --connect-timeout 10 --max-time 30 \
+    "${post_url}" 2>/dev/null) || valid_code="000"
+
+  if [[ "${valid_code}" =~ ^[23] ]]; then
+    echo -e "  ${GREEN}PASS${RESET} [${valid_code}]  ${post_url}  (valid email — comment written to DB)"
+    (( PASS++ )) || true
+  else
+    echo -e "  ${RED}FAIL${RESET} [${valid_code}]  ${post_url}  (valid email)"
+    FAILED_ENDPOINTS+=("${post_url} (valid email)  (HTTP ${valid_code})")
+    (( FAIL++ )) || true
+  fi
+fi
+
+# ----------------------------------------------------------------
 # Summary
 # ----------------------------------------------------------------
 echo "-----------------------------------------------------------"
-echo -e "${BOLD}Results: ${GREEN}${PASS} passed${RESET}  ${RED}${FAIL} failed${RESET}  (total ${#ENDPOINTS[@]})"
+TOTAL=$(( PASS + FAIL ))
+echo -e "${BOLD}Results: ${GREEN}${PASS} passed${RESET}  ${RED}${FAIL} failed${RESET}  (total ${TOTAL})"
 
 if (( FAIL > 0 )); then
   echo -e "\n${BOLD}${RED}Failed endpoints:${RESET}"
