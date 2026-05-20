@@ -34,16 +34,17 @@ app.config.from_object(__name__)
 
 feeds = {
   "github": {
-    "url": "https://github.com/stacks/stacks-project/commits/master.atom",
+    "url": GITHUB_REPO + "/commits/master.atom",
     "title": "Recent commits",
-    "link": "https://github.com/stacks/stacks-project/commits",
-  },
-  "blog": {
-    "url": "https://www.math.columbia.edu/~dejong/wordpress/?feed=rss2",
-    "title": "Recent blog posts",
-    "link": "https://www.math.columbia.edu/~dejong/wordpress",
+    "link": GITHUB_REPO + "/commits",
   },
 }
+if BLOG_FEED_URL:
+  feeds["blog"] = {
+    "url": BLOG_FEED_URL,
+    "title": "Recent blog posts",
+    "link": BLOG_URL,
+  }
 
 # set timeout for feed request
 socket.setdefaulttimeout(5)
@@ -182,6 +183,16 @@ def show_robots():
 
 
 app.jinja_env.add_extension('jinja2.ext.do')
+
+@app.context_processor
+def inject_config():
+  return dict(
+    PROJECT_TITLE=PROJECT_TITLE,
+    GITHUB_REPO=GITHUB_REPO,
+    DOMAIN=DOMAIN,
+    CONTACT_EMAIL=CONTACT_EMAIL,
+    BLOG_URL=BLOG_URL,
+  )
 
 import gerby.views.bibliography
 import gerby.views.comments
