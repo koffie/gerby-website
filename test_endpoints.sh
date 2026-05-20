@@ -45,8 +45,6 @@ PDF_FILE="${PDF_FILE:-book.pdf}"
 # ----------------------------------------------------------------
 KNOWN_FAILING=(
   "/statistics"
-  "/tag/${TAG}/graph/topics"
-  "/tag/${TAG}/graph/tree"
   "/bibliography/${BIBKEY}"
   "/acknowledgements"
   "/contributors"
@@ -77,10 +75,6 @@ ENDPOINTS=(
   "/tags"
 
   # Graphs
-  "/tag/${TAG}/graph/topics"
-  "/tag/${TAG}/graph/structure"
-  "/tag/${TAG}/graph/tree"
-
   # Search
   "/search"
   "/tag"

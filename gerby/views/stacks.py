@@ -206,18 +206,6 @@ def initialize_dependencies():
     references[tag.ref] = tag
 
 
-@app.route("/tag/<string:tag>/graph/topics")
-def show_topics_graph(tag):
-  if not gerby.views.tag.isTag(tag):
-    return "This is not a valid tag."
-
-  try:
-    tag = Tag.get(Tag.tag == tag)
-  except Tag.DoesNotExist:
-    return "This tag does not exist."
-
-  return render_template("stacks/graph.topics.html", tag=tag)
-
 
 @app.route("/data/tag/<string:tag>/graph/topics")
 def show_topics_data(tag):
@@ -277,18 +265,6 @@ def show_topics_data(tag):
 
   return json.dumps(data, indent=2)
 
-
-@app.route("/tag/<string:tag>/graph/structure")
-def show_structure_graph(tag):
-  if not gerby.views.tag.isTag(tag):
-    return "This is not a valid tag."
-
-  try:
-    tag = Tag.get(Tag.tag == tag)
-  except Tag.DoesNotExist:
-    return "This tag does not exist."
-
-  return render_template("stacks/graph.structure.html", tag=tag)
 
 
 @app.route("/data/tag/<string:tag>/graph/structure")
@@ -350,18 +326,6 @@ def show_graph_data(tag):
 
   return json.dumps(data, indent=2)
 
-
-@app.route("/tag/<string:tag>/graph/tree")
-def show_tree_graph(tag):
-  if not gerby.views.tag.isTag(tag):
-    return "This is not a valid tag."
-
-  try:
-    tag = Tag.get(Tag.tag == tag)
-  except Tag.DoesNotExist:
-    return "This tag does not exist."
-
-  return render_template("stacks/graph.dendrogram.html", tag=tag)
 
 
 TREE_LEVEL = 4

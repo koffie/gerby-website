@@ -26,14 +26,6 @@ A Flask-based web application for browsing mathematical content organized by tag
 | `/index.php` | GET | Legacy redirect to tag lookup |
 | `/tags` | GET | List all tags |
 
-### Graphs
-
-| URL | Methods | Description |
-|-----|---------|-------------|
-| `/tag/<tag>/graph/topics` | GET | Topic dependency graph page for a tag |
-| `/tag/<tag>/graph/structure` | GET | Structure graph page for a tag |
-| `/tag/<tag>/graph/tree` | GET | Tree graph page for a tag |
-
 ### Search
 
 | URL | Methods | Description |
