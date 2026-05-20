@@ -34,7 +34,7 @@ TEST_EMAIL="${TEST_EMAIL:-you@example.com}"
 
 # --- sample values for parametrised routes (override via env) ---
 TAG="${TAG:-0001}"
-BIBKEY="${BIBKEY:-SGA1}"
+BIBKEY="${BIBKEY:-Euclid}"
 CHAPTER="${CHAPTER:-1}"
 TEX_FILE="${TEX_FILE:-preamble.tex}"
 PDF_FILE="${PDF_FILE:-book.pdf}"
@@ -44,7 +44,6 @@ PDF_FILE="${PDF_FILE:-book.pdf}"
 # Edit this list as endpoints are fixed or newly broken.
 # ----------------------------------------------------------------
 KNOWN_FAILING=(
-  "/bibliography/${BIBKEY}"
   "/download/${PDF_FILE}"
 )
 
