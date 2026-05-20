@@ -1,4 +1,5 @@
 from gerby.configuration import *
+from gerby.paths import *
 import datetime
 from peewee import *
 from playhouse.sqlite_ext import *

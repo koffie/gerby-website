@@ -12,6 +12,7 @@ from peewee import *
 from playhouse.sqlite_ext import *
 
 from gerby.configuration import *
+from gerby.paths import *
 from gerby.database import *
 
 db.init(DATABASE)

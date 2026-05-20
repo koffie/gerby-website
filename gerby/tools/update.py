@@ -12,6 +12,7 @@ from PyPDF2 import PdfFileReader
 
 from gerby.database import *
 import gerby.configuration
+import gerby.paths
 
 
 # helper function
@@ -22,7 +23,7 @@ def flatten(l):
 def getTags():
   # Get dictionary of tags
   tags = None
-  with open(gerby.configuration.TAGS) as f:
+  with open(gerby.paths.TAGS) as f:
     tags = f.readlines()
     tags = [line.strip() for line in tags if not line.startswith("#")]
     tags = dict([line.split(",") for line in tags if "," in line])
@@ -33,7 +34,7 @@ def importTags(files):
   # import tags
   tagFiles = [filename for filename in files if filename.endswith(".tag")]
   for filename in tagFiles:
-    with open(os.path.join(gerby.configuration.PATH, filename)) as f:
+    with open(os.path.join(gerby.paths.PATH, filename)) as f:
       value = f.read()
 
     filename = filename[:-4]
@@ -78,7 +79,7 @@ def importTags(files):
         filename_regex = re.compile(r'data="(.+?)"')
 
         filename = filename_regex.search(entity.html).group(1)
-        file = os.path.join(gerby.configuration.PATH, filename)
+        file = os.path.join(gerby.paths.PATH, filename)
 
         with open(file) as f:
           entity.html = entity.html.replace(tikz, f.read())
@@ -92,7 +93,7 @@ def importProofs(files):
   # import proofs
   proofFiles = [filename for filename in files if filename.endswith(".proof")]
   for filename in proofFiles:
-    with open(os.path.join(gerby.configuration.PATH, filename)) as f:
+    with open(os.path.join(gerby.paths.PATH, filename)) as f:
       value = f.read()
 
     filename = filename[:-6]
@@ -141,7 +142,7 @@ def importFootnotes(files):
 
   footnoteFiles = [filename for filename in files if filename.endswith(".footnote")]
   for filename in footnoteFiles:
-    with open(os.path.join(gerby.configuration.PATH, filename)) as f:
+    with open(os.path.join(gerby.paths.PATH, filename)) as f:
       value = f.read()
 
     label = filename.split(".")[0]
@@ -175,7 +176,7 @@ def assignParts():
     Part.drop_table()
   Part.create_table()
 
-  partsFile = os.path.join(gerby.configuration.PATH, "parts.json")
+  partsFile = os.path.join(gerby.paths.PATH, "parts.json")
   if os.path.isfile(partsFile):
     with open(partsFile) as f:
       parts = json.load(f)
@@ -226,7 +227,7 @@ def importExtras(files):
   extras = ("slogan", "history", "reference")
   extraFiles = [filename for filename in files if filename.endswith(extras)]
   for filename in extraFiles:
-    with open(os.path.join(gerby.configuration.PATH, filename)) as f:
+    with open(os.path.join(gerby.paths.PATH, filename)) as f:
       value = f.read()
 
     pieces = filename.split(".")
@@ -248,7 +249,7 @@ def importExtras(files):
 def nameTags(tags):
   # Import and assign names to tags
   names = list()
-  context = pickle.load(open(os.path.join(gerby.configuration.PAUX), "rb"))
+  context = pickle.load(open(os.path.join(gerby.paths.PAUX), "rb"))
 
   labels = {item: key for key, item in tags.items()}
   for key, item in context["Gerby"].items():
@@ -272,7 +273,7 @@ def makeBibliography(files):
 
   bibliographyFiles = [filename for filename in files if filename.endswith(".bib")]
   for bibliographyFile in bibliographyFiles:
-    bibtex = pybtex.database.parse_file(os.path.join(gerby.configuration.PATH, bibliographyFile))
+    bibtex = pybtex.database.parse_file(os.path.join(gerby.paths.PATH, bibliographyFile))
 
     for key in bibtex.entries:
       entry = bibtex.entries[key]
@@ -367,7 +368,7 @@ def computeBookStats():
   BookStatistic.create_table()
 
   # load book statistics computed from raw TeX code
-  metaStatsPath = os.path.join(gerby.configuration.PATH, "meta.statistics")
+  metaStatsPath = os.path.join(gerby.paths.PATH, "meta.statistics")
   if os.path.isfile(metaStatsPath):
     with open(metaStatsPath) as f:
       bookStats = json.load(f)
@@ -385,7 +386,7 @@ def computeBookStats():
 
 
 if __name__ == "__main__":
-  db.init(gerby.configuration.DATABASE)
+  db.init(gerby.paths.DATABASE)
 
   parser = argparse.ArgumentParser(description="Script to update databases for Gerby app.")
 
@@ -425,18 +426,18 @@ if __name__ == "__main__":
   log.setLevel(logging.INFO)
 
   # create database if it doesn't exist already
-  if not os.path.isfile(gerby.configuration.DATABASE):
+  if not os.path.isfile(gerby.paths.DATABASE):
     for model in [Tag, Proof, Slogan, History, Reference, Commit, Change, Dependency]:
       model.create_table()
     log.info("Created database")
 
-  if not os.path.isfile(gerby.configuration.COMMENTS):
+  if not os.path.isfile(gerby.paths.COMMENTS):
     Comment.create_table()
     log.info("Created COMMENTS database")
 
   # the information on disk
   tags = getTags()
-  files = [f for f in os.listdir(gerby.configuration.PATH) if os.path.isfile(os.path.join(gerby.configuration.PATH, f)) and f != "index"] # index is always created
+  files = [f for f in os.listdir(gerby.paths.PATH) if os.path.isfile(os.path.join(gerby.paths.PATH, f)) and f != "index"] # index is always created
 
   if not args.noTags:
     log.info("Importing tags")

@@ -8,6 +8,7 @@ from gerby.database import *
 from gerby.views.methods import *
 import gerby.views.tag
 from gerby.configuration import *
+from gerby.paths import *
 
 import json
 import networkx as nx
@@ -43,7 +44,7 @@ def show_acknowledgements():
   acknowledgements = []
 
   try:
-    with app.open_resource("tex/documentation/support", mode="r") as f:
+    with open(ACKNOWLEDGEMENTS) as f:
       for line in f:
         if line.startswith("%") or line.isspace():
           continue
@@ -64,9 +65,8 @@ def show_contributors():
   contributors = []
 
   try:
-    with app.open_resource("tex/CONTRIBUTORS") as f:
+    with open(CONTRIBUTORS) as f:
       for line in f:
-        line = line.decode("utf-8")
         if line.startswith("%") or line.isspace():
           continue
         contributors.append(line)
