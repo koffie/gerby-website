@@ -44,14 +44,8 @@ PDF_FILE="${PDF_FILE:-book.pdf}"
 # Edit this list as endpoints are fixed or newly broken.
 # ----------------------------------------------------------------
 KNOWN_FAILING=(
-  "/statistics"
   "/bibliography/${BIBKEY}"
-  "/acknowledgements"
-  "/contributors"
   "/download/${PDF_FILE}"
-  "/data/tag/${TAG}/graph/topics"
-  "/data/tag/${TAG}/graph/structure"
-  "/data/tag/${TAG}/graph/tree"
 )
 
 # ----------------------------------------------------------------

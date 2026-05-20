@@ -43,6 +43,7 @@
   </tbody>
 </table>
 
+{% if records %}
 <h3>Record-breaking tags</h3>
 <table class="table table-striped table-hover">
   <thead>
@@ -77,6 +78,10 @@
     </tr>
   </tbody>
 </table>
+{% else %}
+<h3>Record-breaking tags</h3>
+<p>No record-breaking tag data is available.
+{% endif %}
 
 <h3>Other statistics</h3>
 <table class="table table-striped table-hover">

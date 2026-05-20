@@ -63,12 +63,15 @@ def show_contribute():
 def show_contributors():
   contributors = []
 
-  with app.open_resource("tex/CONTRIBUTORS") as f:
-    for line in f:
-      line = line.decode("utf-8")
-      if line.startswith("%") or line.isspace():
-        continue
-      contributors.append(line)
+  try:
+    with app.open_resource("tex/CONTRIBUTORS") as f:
+      for line in f:
+        line = line.decode("utf-8")
+        if line.startswith("%") or line.isspace():
+          continue
+        contributors.append(line)
+  except FileNotFoundError:
+    pass
 
   return render_template("single/contributors.html", contributors=contributors)
 
@@ -189,23 +192,25 @@ references = None
 # this is put into a separate function to avoid initalization problems
 # TODO it would be better to do this differently, but this at least fixes the problems that people experience, for now
 def initialize_dependencies():
+  global structure, references
+
   if structure != None and references != None:
     return
 
   tags = Tag.select().prefetch(Dependency)
-  
+
   # dictionary of tags with keys the tags
   structure = dict()
   for tag in tags:
     structure[tag.tag] = tag
-  
+
   # dictionary of tags with keys the references
   references = dict()
   for tag in tags:
     # ignore these
     if tag.type in ["item", "part"]:
       continue
-  
+
     references[tag.ref] = tag
 
 
@@ -221,7 +226,7 @@ def show_topics_data(tag):
     return "This tag does not exist."
 
   # TODO avoid this
-  initalize_dependencies()
+  initialize_dependencies()
 
   # these will contain the actual chapter and section numbers
   chapters = set()
@@ -281,7 +286,7 @@ def show_graph_data(tag):
     return "This tag does not exist."
 
   # TODO avoid this
-  initalize_dependencies()
+  initialize_dependencies()
 
   data = dict()
   data["nodes"] = []
@@ -335,7 +340,7 @@ TREE_LEVEL = 4
 @app.route("/data/tag/<string:tag>/graph/tree")
 def show_tree_data(tag):
   # TODO avoid this
-  initalize_dependencies()
+  initialize_dependencies()
 
   # recursive method to populate the tree
   def populate_tree(tag, level=0):
