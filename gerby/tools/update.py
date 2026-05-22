@@ -73,7 +73,7 @@ def importTags(files):
 
     # dealing with tikzpicture and tikzcd (and possibly others)
     for type in ["tikzpicture", "tikzcd"]:
-      environment_regex = re.compile(r'<div class="' + type + '">(.+?)<\/div>', flags=re.DOTALL)
+      environment_regex = re.compile(rf'<div class="{type}">(.+?)</div>', flags=re.DOTALL)
 
       for tikz in environment_regex.findall(entity.html):
         filename_regex = re.compile(r'data="(.+?)"')
